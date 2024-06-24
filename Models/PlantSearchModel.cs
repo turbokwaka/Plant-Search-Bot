@@ -2,7 +2,7 @@ namespace GardenBot.Models;
 
 public class PlantSearchModel
 {
-    public List<PlantSearchModel> data { get; set; }
+    public List<PlantSearchModelData?> Data { get; set; }
 }
 
 public class PlantSearchModelData

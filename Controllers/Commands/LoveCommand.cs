@@ -16,13 +16,17 @@ public class LoveCommand : ICommand, IListener
         Executor = executor;
     }
 
-    private string? answer1 = null;
-    private string? answer2 = null;
+    private string? _answer1 = null;
+    private string? _answer2 = null;
 
     public async Task Execute(Update update)
     {
         long chatId = update.Message.Chat.Id;
-        Executor.StartListen(this); 
+        if (update.Message.Text == null) 
+            return;
+        
+        Executor.StartListen(this);
+        
         await Client.SendTextMessageAsync(chatId, "Як тебе звати?");
     }
 
@@ -32,11 +36,11 @@ public class LoveCommand : ICommand, IListener
         if (update.Message.Text == null) 
             return;
 
-        if (answer1 == null)
+        if (_answer1 == null)
         {
             if (update.Message.Text.ToLower() == "аделіна" || update.Message.Text.ToLower() == "аделина")
             {
-                answer1 = update.Message.Text;
+                _answer1 = update.Message.Text;
                 await Client.SendTextMessageAsync(chatId, "Привіт, кицунь)) Ти мене кохаєш?");
             }
             else
@@ -44,12 +48,12 @@ public class LoveCommand : ICommand, IListener
                 await Client.SendTextMessageAsync(chatId, "Відповідь неправильна. Як тебе звати?");
             }
         }
-        else if (answer2 == null)
+        else if (_answer2 == null)
         {
             string lowerText = update.Message.Text.ToLower();
             if (lowerText == "так" || lowerText == "звісно" || lowerText == "канєшно" || lowerText == "да")
             {
-                answer2 = update.Message.Text;
+                _answer2 = update.Message.Text;
                 await Client.SendTextMessageAsync(chatId, "І я тебе кохаю, сонечко <3");
                 Executor.StopListen();
             }
