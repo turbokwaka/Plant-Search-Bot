@@ -15,7 +15,8 @@ public class CommandExecutor : ITelegramUpdateListener
         {
             new NotFoundCommand(),
             new StartCommand(),
-            new LoveCommand(this)
+            new LoveCommand(this),
+            new SearchCommand(this)
         };
         notFoundCommand = new NotFoundCommand();
     }

@@ -8,7 +8,8 @@ namespace GardenBot.Controllers.Commands;
 public class SearchCommand : ICommand, IListener
 {
     public TelegramBotClient Client => Bot.GetTelegramBot();
-    public string Name => "Знайти рослинку\ud83c\udf31";
+    // public string Name => "Знайти рослинку\ud83c\udf31";
+    public string Name => "/search";
     public CommandExecutor Executor { get; }
     private PlantSearchService _plantSearchService = new PlantSearchService();
 
@@ -27,7 +28,7 @@ public class SearchCommand : ICommand, IListener
 
         Executor.StartListen(this); 
         
-        await Client.SendTextMessageAsync(chatId, "Введи назву рослини");
+        await Client.SendTextMessageAsync(chatId, "Введи назву рослини.");
     }
 
     public async Task GetUpdate(Update update)
@@ -41,7 +42,7 @@ public class SearchCommand : ICommand, IListener
 
         if (plant == null)
         {
-            await Client.SendTextMessageAsync(chatId, "Please, enter a name of a plant.");
+            await Client.SendTextMessageAsync(chatId, "Ви не ввели назву рослини. Зробіть це.");
             return;
         }
         
@@ -53,5 +54,7 @@ public class SearchCommand : ICommand, IListener
                      $"\nWatering: {plant.Watering}" +
                      $"\nSunlight: {plant.Sunligt}" +
                      $"\n\nYou've been searching for this plant?");
+        
+        Executor.StopListen();
     }
 }

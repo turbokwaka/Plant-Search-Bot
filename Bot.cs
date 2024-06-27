@@ -8,11 +8,12 @@ public class Bot
 
     public static TelegramBotClient GetTelegramBot()
     {
+        var configuration = new MyConfiguration();
         if (client != null)
         {
             return client;
         }
-        client = new TelegramBotClient("YOUR_TOKEN");
+        client = new TelegramBotClient(configuration.TelegramToken);
         return client;
     }
 }
