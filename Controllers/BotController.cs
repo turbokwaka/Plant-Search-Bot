@@ -12,9 +12,10 @@ public class BotController(UpdateDistributor<CommandExecutor> updateDistributor)
     
     public async void Post(Update update)
     {
-        Console.WriteLine("Update was received.");
-        if (update.Message == null)
+        if (update.Message == null && update.CallbackQuery == null)
             return;
+        
+        Console.WriteLine("\nUpdate was received.");
 
         await updateDistributor.GetUpdate(update);
     }

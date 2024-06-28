@@ -9,13 +9,30 @@ public class PlantSearchService
     private readonly MyConfiguration _configuration = new MyConfiguration();
     private PlantSearchModel? _plantData = null;
     private string? _keyword = null;
-    private int _plantIndex = 0;
-    public async Task<PlantSearchModelData?> GetPlant(string? keyword)
+    public async Task<PlantSearchModelData?> Execute(string? keyword)
     {
         _keyword = keyword;
         _plantData = await Search(keyword);
+
+        // Check if _plantData or _plantData.Data is null or empty
+        if (_plantData?.Data != null && _plantData.Data.Any())
+        {
+            return _plantData.Data.First();
+        }
         
-        return _plantData.Data.First();
+        return null;
+    }
+
+    public async Task<PlantSearchModelData?> GetPlant()
+    {
+        _plantData.Data.RemoveAt(0);
+        
+        if (_plantData?.Data != null && _plantData.Data.Any())
+        {
+            return _plantData.Data.First();
+        }
+        
+        return null;
     }
     
     private async Task<PlantSearchModel?> Search(string keyword)

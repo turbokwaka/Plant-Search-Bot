@@ -38,7 +38,7 @@ public class LoveCommand : ICommand, IListener
 
         if (_answer1 == null)
         {
-            if (update.Message.Text.ToLower() == "аделіна" || update.Message.Text.ToLower() == "аделина")
+            if (update.Message.Text.ToLower() == "аделіна" || update.Message.Text.ToLower() == "ліна")
             {
                 _answer1 = update.Message.Text;
                 await Client.SendTextMessageAsync(chatId, "Привіт, кицунь)) Ти мене кохаєш?");

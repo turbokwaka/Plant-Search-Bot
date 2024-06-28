@@ -13,7 +13,14 @@ public class UpdateDistributor<T> where T : ITelegramUpdateListener, new()
 
     public async Task GetUpdate(Update update)
     {
-        long chatId = update.Message.Chat.Id;
+        long chatId;
+        if (update.Message != null)
+            chatId = update.Message.Chat.Id;
+        else if (update.CallbackQuery != null)
+            chatId = update.CallbackQuery.Message.Chat.Id;
+        else
+            return;
+        
         Console.WriteLine("Distributing update...");
         T? listener = listeners.GetValueOrDefault(chatId);
         if (listener is null)
@@ -23,6 +30,8 @@ public class UpdateDistributor<T> where T : ITelegramUpdateListener, new()
             await listener.GetUpdate(update);
             return;
         }
+
+        Console.WriteLine("Getting update from listener");
         await listener.GetUpdate(update);
     }
 }
