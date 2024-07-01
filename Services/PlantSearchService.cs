@@ -14,7 +14,6 @@ public class PlantSearchService
         _keyword = keyword;
         _plantData = await Search(keyword);
 
-        // Check if _plantData or _plantData.Data is null or empty
         if (_plantData?.Data != null && _plantData.Data.Any())
         {
             return _plantData.Data.First();
@@ -41,10 +40,10 @@ public class PlantSearchService
         var url = $"{_configuration.ApiUrl}api/species-list?key={_configuration.ApiTokens.First()}&q={keyword}&indoor=1";
 
         var response = await httpClient.GetStringAsync(url);
-        return await ParseJson(response);
+        return ParseJsonDataAsync(response);
     }
 
-    private async Task<PlantSearchModel> ParseJson(string json)
+    private PlantSearchModel ParseJsonDataAsync(string json)
     {
         var jsonObject = JObject.Parse(json);
         var returnObject = new PlantSearchModel();
@@ -52,23 +51,37 @@ public class PlantSearchService
 
         foreach (var item in jsonObject["data"])
         {
-            var invalidPropertiesCount = 0;
+            int invalidPropertiesCount = 0;
 
-            bool cycleIsValid = await propertyCheckService.Check((string)item["cycle"]);
-            bool wateringIsValid = await propertyCheckService.Check((string)item["watering"]);
-            bool sunlightIsValid = await propertyCheckService.Check(String.Join(", ", item["sunlight"]));
-            bool imageIsValid = await propertyCheckService.Check((string) item["default_image"]["original_url"]);
-            
+            var cycle = (string)item["cycle"];
+            var watering = (string)item["watering"];
+            var sunlight = String.Join(", ", item["sunlight"]);
+            var imageUrl = (string)item["default_image"]["original_url"];
+
+            bool cycleIsValid = propertyCheckService.Check(cycle);
+            bool wateringIsValid = propertyCheckService.Check(watering);
+            bool sunlightIsValid = propertyCheckService.Check(sunlight);
+            bool imageIsValid = propertyCheckService.Check(imageUrl);
+
+            if (!cycleIsValid) invalidPropertiesCount++;
+            if (!wateringIsValid) invalidPropertiesCount++;
+            if (!sunlightIsValid) invalidPropertiesCount++;
+            if (!imageIsValid) invalidPropertiesCount++;
+
+            if (invalidPropertiesCount > 2) continue;
+
             returnObject.Data.Add(new PlantSearchModelData
             {
+                Id = (int)item["id"],
                 CommonName = (string)item["common_name"],
                 ScientificName = string.Join(", ", item["scientific_name"]),
-                Cycle = cycleIsValid ? (string) item["cycle"] : "No information.",
-                Watering = wateringIsValid ? (string) item["watering"] : "No information.",
-                Sunligt = sunlightIsValid ? String.Join(", ", item["sunlight"]) : "No information.",
-                ImageUrl = imageIsValid ? (string) item["default_image"]["original_url"] : "https://postimg.cc/0rBn2kDn"
+                Cycle = cycleIsValid ? cycle : "No information.",
+                Watering = wateringIsValid ? watering : "No information.",
+                Sunlight = sunlightIsValid ? sunlight : "No information.",
+                ImageUrl = imageIsValid ? imageUrl : "https://postimg.cc/0rBn2kDn"
             });
         }
+
 
         return returnObject;
     }

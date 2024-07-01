@@ -11,7 +11,7 @@ public class PropertyCheckService
         _configuration = new MyConfiguration();
     }
     
-    public async Task<bool> Check(string prop)
+    public bool Check(string prop)
     {
         if (string.IsNullOrEmpty(prop))
         {
@@ -25,8 +25,8 @@ public class PropertyCheckService
                 return false;
             }
         
-            var response = await _httpClient.GetAsync(prop);
-            var content = await response.Content.ReadAsStringAsync();
+            var response = _httpClient.GetAsync(prop).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
             
             if (content.Contains($"{_configuration.ApiUrl}storage/image/error_asset/plant.png"))
             {

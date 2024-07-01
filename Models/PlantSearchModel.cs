@@ -12,10 +12,11 @@ public class PlantSearchModel
 
 public class PlantSearchModelData
 {
+    public int Id { get; set; }
     public string CommonName { get; set; }
     public string ScientificName { get; set; }
     public string Cycle { get; set; }
     public string Watering { get; set; }
-    public string Sunligt { get; set; }
+    public string Sunlight { get; set; }
     public string ImageUrl { get; set; }
 }

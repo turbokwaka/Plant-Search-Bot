@@ -1,6 +1,8 @@
+using GardenBot.Models;
 using GardenBot.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GardenBot.Controllers.Commands;
@@ -10,7 +12,10 @@ public class SearchCommand : ICommand, IListener
     public TelegramBotClient Client => Bot.GetTelegramBot();
     public string Name => "/search";
     public CommandExecutor Executor { get; }
-    private PlantSearchService _plantSearchService = new();
+    private readonly PlantSearchService _plantSearchService = new();
+    private readonly PlantDetailedInfoService _plantDetailedInfoService = new();
+    private PlantSearchModelData? _searchPlant;
+    private PlantInfoModel? _infoPlant;
 
     public SearchCommand(CommandExecutor executor)
     {
@@ -27,7 +32,7 @@ public class SearchCommand : ICommand, IListener
 
         Executor.StartListen(this); 
         
-        await Client.SendTextMessageAsync(chatId, "Введи назву рослини.");
+        await Client.SendTextMessageAsync(chatId, "What plant are you looking for?");
     }
 
     public async Task GetUpdate(Update update)
@@ -37,35 +42,35 @@ public class SearchCommand : ICommand, IListener
         if (update.Message != null && _answer1 == null)
         {
             _answer1 = update.Message.Text;
-            var plant = await _plantSearchService.Execute(_answer1);
+            _searchPlant = await _plantSearchService.Execute(_answer1);
 
-            if (plant == null)
+            if (_searchPlant == null)
             {
-                await Client.SendTextMessageAsync(chatId, "Я не зміг знайти рослинку по цьому запиту :(" +
-                                                          "\nСпробуйте використати іншу назву.");
+                await Client.SendTextMessageAsync(chatId, "I couldn't find any more plants 😔" +
+                                                          "\nConsider using other keyword.");
                 Executor.StopListen();
                 return;
             }
 
-            InputFile photo = InputFile.FromUri(plant.ImageUrl);
+            InputFile photo = InputFile.FromUri(_searchPlant.ImageUrl);
             var buttons = new InlineKeyboardMarkup(new[]
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData("Далі", "next"),
-                    InlineKeyboardButton.WithCallbackData("Детальніше", "detailed_info"),
-                    InlineKeyboardButton.WithCallbackData("Зупинити пошук", "stop_search")
+                    InlineKeyboardButton.WithCallbackData("Skip", "next"),
+                    InlineKeyboardButton.WithCallbackData("Info", "detailed_info"),
+                    InlineKeyboardButton.WithCallbackData("Menu", "menu")
                 }
             });
 
             await Client.SendPhotoAsync(chatId, photo, 
-                caption: $"Here is your plant - {plant.CommonName}" +
-                         $"\n(scientific name: {plant.ScientificName})" +
-                         $"\n\nCycle: {plant.Cycle}" +
-                         $"\nWatering: {plant.Watering}" +
-                         $"\nSunlight: {plant.Sunligt}" +
+                caption: $"🌿 *{_searchPlant.CommonName}* (Scientific Name: {_searchPlant.ScientificName})\n\n" +
+                         $"🔄 *Life Cycle*: {_searchPlant.Cycle}\n\n" +
+                         $"💧 *Watering Needs*: {_searchPlant.Watering}\n\n" +
+                         $"☀️ *Sunlight Requirements*: {_searchPlant.Sunlight}\n\n" +
                          $"\n\nYou've been searching for this plant?",
-                replyMarkup: buttons);
+                replyMarkup: buttons,
+                parseMode: ParseMode.Markdown);
         }
         else if (update.CallbackQuery != null)
         {
@@ -79,46 +84,74 @@ public class SearchCommand : ICommand, IListener
 
         if (callbackQuery.Data == "next")
         {
-            var plant = await _plantSearchService.GetPlant();
+            _searchPlant = await _plantSearchService.GetPlant();
             
-            if (plant == null)
+            if (_searchPlant == null)
             {
-                await Client.SendTextMessageAsync(chatId, "Більше рослинок по цьому запиту нема :(" +
-                                                          "\nСпробуйте використати іншу назву.");
+                await Client.SendTextMessageAsync(chatId, "I couldn't find any more plants 😔" +
+                                                          "\nConsider using other keyword.");
                 Executor.StopListen();
                 return;
             }
 
-            InputFile photo = InputFile.FromUri(plant.ImageUrl);
+            InputFile photo = InputFile.FromUri(_searchPlant.ImageUrl);
             var buttons = new InlineKeyboardMarkup(new[]
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData("Далі", "next"),
-                    InlineKeyboardButton.WithCallbackData("Детальна інформація", "detailed_info"),
-                    InlineKeyboardButton.WithCallbackData("Зупинити пошук", "stop_search")
+                    InlineKeyboardButton.WithCallbackData("Skip", "next"),
+                    InlineKeyboardButton.WithCallbackData("Info", "detailed_info"),
+                    InlineKeyboardButton.WithCallbackData("Menu", "menu")
                 }
             });
             
             await Client.SendPhotoAsync(chatId, photo, 
-                caption: $"Here is your plant - {plant.CommonName}" +
-                         $"\n(scientific name: {plant.ScientificName})" +
-                         $"\n\nCycle: {plant.Cycle}" +
-                         $"\nWatering: {plant.Watering}" +
-                         $"\nSunlight: {plant.Sunligt}" +
+                caption: $"🌿 *{_searchPlant.CommonName}* (Scientific Name: {_searchPlant.ScientificName})\n\n" +
+                         $"🔄 *Life Cycle*: {_searchPlant.Cycle}\n\n" +
+                         $"💧 *Watering Needs*: {_searchPlant.Watering}\n\n" +
+                         $"☀️ *Sunlight Requirements*: {_searchPlant.Sunlight}\n\n" +
                          $"\n\nYou've been searching for this plant?",
-                replyMarkup: buttons);
+                replyMarkup: buttons,
+                parseMode: ParseMode.Markdown);
         }
         else if (callbackQuery.Data == "detailed_info")
         {
-            await Client.SendTextMessageAsync(chatId, "Here is the detailed information about the plant...");
+            _infoPlant = await _plantDetailedInfoService.GetPlant(_searchPlant.Id);
+            InputFile photo = InputFile.FromUri(_infoPlant.ImageUrl);
+            
+            var buttons = new InlineKeyboardMarkup(new[]
+            {
+                new []
+                {
+                    InlineKeyboardButton.WithCallbackData("Save", "save"),
+                    InlineKeyboardButton.WithCallbackData("Menu", "menu")
+                }
+            });
+
+            await Client.SendPhotoAsync(chatId, photo,
+                caption: $"🌿 *{_infoPlant.CommonName}* (Scientific Name: {_infoPlant.ScientificName})\n\n" +
+                         $"📝 *Description*: {_infoPlant.Description}\n\n" +
+                         $"☀️ *Sunlight Requirements*: {_infoPlant.Sunlight}\n\n" +
+                         $"🔄 *Life Cycle*: {_infoPlant.Cycle}\n\n" +
+                         $"💧 *Watering Needs*: {_infoPlant.Watering}\n\n" +
+                         $"🌱 *Preferred Soil*: {_infoPlant.Soil}\n\n" +
+                         $"📏 *Growth Size*: {_infoPlant.GrowthSize}\n\n" +
+                         $"🌸 *Blooming Period*: {_infoPlant.Blooming}",
+                replyMarkup: buttons,
+                parseMode: ParseMode.Markdown);
         }
-        else if (callbackQuery.Data == "stop_search")
+        else if (callbackQuery.Data == "menu")
         {
             await Client.SendTextMessageAsync(chatId, "Stopping the search...");
+            _answer1 = null;
+            
             Executor.StopListen();
-            return;
         }
+        else if (callbackQuery.Data == "save")
+        {
+            // will be here soon
+        }
+        
 
         await Client.AnswerCallbackQueryAsync(callbackQuery.Id);
     }
