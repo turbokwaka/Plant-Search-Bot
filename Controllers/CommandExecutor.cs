@@ -39,7 +39,7 @@ public class CommandExecutor : ITelegramUpdateListener
         bool commandFound = false;
         foreach (var command in commands)
         {
-            if (command.Name == msg.Text)
+            if (command.Name == msg?.Text || command.Name == update.CallbackQuery?.Data)
             {
                 commandFound = true;
                 await command.Execute(update);

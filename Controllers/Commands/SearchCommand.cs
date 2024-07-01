@@ -10,7 +10,7 @@ namespace GardenBot.Controllers.Commands;
 public class SearchCommand : ICommand, IListener
 {
     public TelegramBotClient Client => Bot.GetTelegramBot();
-    public string Name => "/search";
+    public string Name => "search";
     public CommandExecutor Executor { get; }
     private readonly PlantSearchService _plantSearchService = new();
     private readonly PlantDetailedInfoService _plantDetailedInfoService = new();
@@ -26,9 +26,7 @@ public class SearchCommand : ICommand, IListener
 
     public async Task Execute(Update update)
     {
-        long chatId = update.Message!.Chat.Id;
-        if (update.Message.Text == null) 
-            return;
+        long chatId = update.Message?.Chat.Id ?? update.CallbackQuery.Message.Chat.Id;;
 
         Executor.StartListen(this); 
         
@@ -44,16 +42,28 @@ public class SearchCommand : ICommand, IListener
             _answer1 = update.Message.Text;
             _searchPlant = await _plantSearchService.Execute(_answer1);
 
+            InlineKeyboardMarkup? buttons;
             if (_searchPlant == null)
             {
-                await Client.SendTextMessageAsync(chatId, "I couldn't find any more plants 😔" +
-                                                          "\nConsider using other keyword.");
-                Executor.StopListen();
+                buttons = new InlineKeyboardMarkup(new[]
+                {
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Back to menu", "menu")
+                    }
+                });
+                
+                await Client.SendTextMessageAsync(chatId, "I can't found this plant 😔" +
+                                                          "\nPlease, enter other name.",
+                    replyMarkup: buttons);
+                
+                _answer1 = null;
+                
                 return;
             }
 
             InputFile photo = InputFile.FromUri(_searchPlant.ImageUrl);
-            var buttons = new InlineKeyboardMarkup(new[]
+            buttons = new InlineKeyboardMarkup(new[]
             {
                 new []
                 {
@@ -74,12 +84,14 @@ public class SearchCommand : ICommand, IListener
         }
         else if (update.CallbackQuery != null)
         {
-            await HandleCallbackQuery(update.CallbackQuery);
+            await HandleCallbackQuery(update);
         }
     }
 
-    private async Task HandleCallbackQuery(CallbackQuery callbackQuery)
+    private async Task HandleCallbackQuery(Update update)
     {
+        var callbackQuery = update.CallbackQuery;
+        
         long chatId = callbackQuery.Message.Chat.Id;
 
         if (callbackQuery.Data == "next")
@@ -88,7 +100,7 @@ public class SearchCommand : ICommand, IListener
             
             if (_searchPlant == null)
             {
-                await Client.SendTextMessageAsync(chatId, "I couldn't find any more plants 😔" +
+                await Client.SendTextMessageAsync(chatId, "I can't find any more plants 😔" +
                                                           "\nConsider using other keyword.");
                 Executor.StopListen();
                 return;
@@ -142,10 +154,12 @@ public class SearchCommand : ICommand, IListener
         }
         else if (callbackQuery.Data == "menu")
         {
-            await Client.SendTextMessageAsync(chatId, "Stopping the search...");
             _answer1 = null;
             
             Executor.StopListen();
+
+            var startCommand = new StartCommand();
+            await startCommand.Execute(update);
         }
         else if (callbackQuery.Data == "save")
         {
