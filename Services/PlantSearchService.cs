@@ -72,7 +72,7 @@ public class PlantSearchService
 
             returnObject.Data.Add(new PlantSearchModelData
             {
-                Id = (int)item["id"],
+                PlantId = (int)item["id"],
                 CommonName = (string)item["common_name"],
                 ScientificName = string.Join(", ", item["scientific_name"]),
                 Cycle = cycleIsValid ? cycle : "No information.",

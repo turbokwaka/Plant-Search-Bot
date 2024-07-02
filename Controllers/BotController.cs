@@ -15,7 +15,8 @@ public class BotController(UpdateDistributor<CommandExecutor> updateDistributor)
         if (update.Message == null && update.CallbackQuery == null)
             return;
         
-        Console.WriteLine("\nUpdate was received.");
+        Console.WriteLine($"{DateTime.Now.ToUniversalTime()}\n" +
+                          $"Update was received.\n");
 
         await updateDistributor.GetUpdate(update);
     }

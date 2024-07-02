@@ -21,7 +21,6 @@ public class UpdateDistributor<T> where T : ITelegramUpdateListener, new()
         else
             return;
         
-        Console.WriteLine("Distributing update...");
         T? listener = listeners.GetValueOrDefault(chatId);
         if (listener is null)
         {
@@ -31,7 +30,6 @@ public class UpdateDistributor<T> where T : ITelegramUpdateListener, new()
             return;
         }
 
-        Console.WriteLine("Getting update from listener");
         await listener.GetUpdate(update);
     }
 }

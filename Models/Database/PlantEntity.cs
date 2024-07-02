@@ -1,8 +1,16 @@
-namespace GardenBot.Models;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-public class PlantInfoModel
+namespace GardenBot.Models.Database;
+
+public class PlantEntity
 {
+    [Key] 
     public int PlantId { get; set; }
+    
+    [ForeignKey("UserId")]
+    public int UserId { get; set; }
+    
     public string CommonName { get; set; }
     public string ScientificName { get; set; }
     public string Description { get; set; }

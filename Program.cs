@@ -1,4 +1,6 @@
 using GardenBot.Controllers;
+using GardenBot.Models.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace GardenBot;
 
@@ -10,6 +12,8 @@ public class Program
         
         builder.Services.AddControllers().AddNewtonsoftJson();
         builder.Services.AddSingleton<UpdateDistributor<CommandExecutor>>();
+        builder.Services.AddDbContext<ApplicationContext>(options =>
+            options.UseNpgsql("DatabaseConnectionString"));
         
         var app = builder.Build();
 

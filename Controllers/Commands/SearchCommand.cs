@@ -128,7 +128,7 @@ public class SearchCommand : ICommand, IListener
         }
         else if (callbackQuery.Data == "detailed_info")
         {
-            _infoPlant = await _plantDetailedInfoService.GetPlant(_searchPlant.Id);
+            _infoPlant = await _plantDetailedInfoService.GetPlant(_searchPlant.PlantId);
             InputFile photo = InputFile.FromUri(_infoPlant.ImageUrl);
             
             var buttons = new InlineKeyboardMarkup(new[]

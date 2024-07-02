@@ -12,7 +12,7 @@ public class PlantSearchModel
 
 public class PlantSearchModelData
 {
-    public int Id { get; set; }
+    public int PlantId { get; set; }
     public string CommonName { get; set; }
     public string ScientificName { get; set; }
     public string Cycle { get; set; }

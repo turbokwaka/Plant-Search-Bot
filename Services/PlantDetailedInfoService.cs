@@ -33,7 +33,8 @@ public class PlantDetailedInfoService
         var minDimension = (int?)dimensions?["min_value"];
         var maxDimension = (int?)dimensions?["max_value"];
         var dimensionUnit = (string)dimensions?["unit"];
-        
+
+        var id = (int)jsonObject["id"];
         var commonName = (string)jsonObject["common_name"] ?? "No information.";
         var scientificName = string.Join(", ", jsonObject["scientific_name"] ?? new JArray());
         var description = (string)jsonObject["description"] ?? "No description available.";
@@ -56,6 +57,7 @@ public class PlantDetailedInfoService
 
         return new PlantInfoModel
         {
+            PlantId = id,
             CommonName = commonName,
             ScientificName = scientificName,
             Description = description,
