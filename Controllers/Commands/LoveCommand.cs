@@ -7,7 +7,7 @@ public class LoveCommand : ICommand, IListener
 {
     public TelegramBotClient Client => Bot.GetTelegramBot();
 
-    public string Name => "/лоарівллоівпрвіло";
+    public string Name => "/secretlovecommand";
 
     public CommandExecutor Executor { get; }
 

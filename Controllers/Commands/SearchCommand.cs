@@ -135,7 +135,6 @@ public class SearchCommand : ICommand, IListener
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData("Save", "save"),
                     InlineKeyboardButton.WithCallbackData("Menu", "menu")
                 }
             });
@@ -158,14 +157,9 @@ public class SearchCommand : ICommand, IListener
             
             Executor.StopListen();
 
-            var startCommand = new StartCommand();
-            await startCommand.Execute(update);
+            var menuCommand = new MenuCommand();
+            await menuCommand.Execute(update);
         }
-        else if (callbackQuery.Data == "save")
-        {
-            // will be here soon
-        }
-        
 
         await Client.AnswerCallbackQueryAsync(callbackQuery.Id);
     }

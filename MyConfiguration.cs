@@ -5,6 +5,7 @@ public class MyConfiguration
     public string TelegramToken { get; }
     public string ApiUrl { get; }
     public List<string> ApiTokens { get; }
+    public string ConnectionString { get; }
 
     public MyConfiguration()
     {
@@ -20,5 +21,6 @@ public class MyConfiguration
         ApiTokens = configuration.GetSection("MyConfiguration:ApiTokens").GetChildren()
             .Select(token => token.Value)
             .ToList()!;
+        ConnectionString = configuration["MyConfiguration:DatabaseConnectionString"]!;
     }
 }

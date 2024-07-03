@@ -7,7 +7,5 @@ public class UserEntity
 {
     [Key]
     public int UserId { get; set; }
-    public string? Nickname { get; set; }
-    
-    public ICollection<PlantEntity> Plants { get; set; }
+    public string? FirstName { get; set; }
 }

@@ -11,6 +11,6 @@ public class NotFoundCommand : ICommand
     public async Task Execute(Update update)
     {
         long chatId = update.Message.Chat.Id;
-        await Client.SendTextMessageAsync(chatId, "Я не знаю такої команди :(. Можливо, ти ввів її неправильно..");
+        await Client.SendTextMessageAsync(chatId, "I don't know this command...");
     }
 }
