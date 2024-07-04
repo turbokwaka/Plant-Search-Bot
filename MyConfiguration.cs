@@ -6,6 +6,7 @@ public class MyConfiguration
     public string ApiUrl { get; }
     public List<string> ApiTokens { get; }
     public string ConnectionString { get; }
+    public List<int> AdminUsers { get; }
 
     public MyConfiguration()
     {
@@ -22,5 +23,9 @@ public class MyConfiguration
             .Select(token => token.Value)
             .ToList()!;
         ConnectionString = configuration["MyConfiguration:DatabaseConnectionString"]!;
+        AdminUsers = configuration["MyConfiguration:AdminUsers"]
+            .Split(", ")
+            .Select(int.Parse)
+            .ToList();;
     }
 }

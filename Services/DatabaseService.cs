@@ -37,5 +37,10 @@ namespace GardenBot.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<int>> GetAllUsers()
+        {
+            return _context.Users.Select(e => e.UserId).ToList();
+        }
     }
 }
